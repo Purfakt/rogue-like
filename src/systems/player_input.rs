@@ -23,7 +23,8 @@ pub fn player_input(
         };
         let (player_entity, destination) = players
             .iter(ecs)
-            .find_map(|(entity, pos)| Some((*entity, *pos + delta)))
+            .map(|(entity, pos)| (*entity, *pos + delta))
+            .next()
             .unwrap();
 
         let mut enemies = <(Entity, &Point)>::query().filter(component::<Enemy>());

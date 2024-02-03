@@ -24,7 +24,7 @@ impl MapBuilder {
         let dijkstra_map = DijkstraMap::new(
             SCREEN_WIDTH,
             SCREEN_HEIGHT,
-            &vec![builder.map.point2d_to_index(builder.player_start)],
+            &[builder.map.point2d_to_index(builder.player_start)],
             &builder.map,
             1024.0,
         );
