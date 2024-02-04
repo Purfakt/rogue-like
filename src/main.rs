@@ -109,6 +109,7 @@ fn reset_game(ecs: &mut World, resources: &mut Resources) {
     resources.insert(map_builder.map);
     resources.insert(Camera::new(map_builder.player_start));
     resources.insert(TurnState::AwaitingInput);
+    resources.insert(map_builder.theme);
 }
 
 impl GameState for State {
