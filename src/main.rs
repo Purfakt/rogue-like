@@ -151,10 +151,7 @@ impl State {
             map_builder.map.tiles[exit_idx] = TileType::Exit;
         }
 
-        map_builder
-            .monster_spawns
-            .iter()
-            .for_each(|pos| spawn_entity(&mut self.ecs, &mut rng, *pos));
+        spawn_level(&mut self.ecs, &mut rng, map_level as usize, &map_builder.monster_spawns);
         self.resources.insert(map_builder.map);
         self.resources.insert(Camera::new(map_builder.player_start));
         self.resources.insert(TurnState::AwaitingInput);
@@ -168,9 +165,7 @@ fn reset_game(ecs: &mut World, resources: &mut Resources) {
     spawn_player(ecs, map_builder.player_start);
     let exit_idx = map_builder.map.point2d_to_index(map_builder.amulet_start);
     map_builder.map.tiles[exit_idx] = TileType::Exit;
-    map_builder.monster_spawns.iter().for_each(|pos| {
-        spawn_entity(ecs, &mut rng, *pos);
-    });
+    spawn_level(ecs, &mut rng, 0, &map_builder.monster_spawns);
     resources.insert(map_builder.map);
     resources.insert(Camera::new(map_builder.player_start));
     resources.insert(TurnState::AwaitingInput);
