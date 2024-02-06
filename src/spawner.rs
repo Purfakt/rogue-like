@@ -51,3 +51,38 @@ pub fn spawn_amulet(ecs: &mut World, pos: Point) {
         },
     ));
 }
+
+pub fn spawn_health_potion(ecs: &mut World, pos: Point) {
+    ecs.push((
+        Item,
+        pos,
+        Render {
+            color: ColorPair::new(WHITE, BLACK),
+            glyph: to_cp437('!'),
+        },
+        Name("Health Potion".to_string()),
+        ProvidesHealing { amount: 6 },
+    ));
+}
+
+pub fn spawn_magic_mapping_scroll(ecs: &mut World, pos: Point) {
+    ecs.push((
+        Item,
+        pos,
+        Render {
+            color: ColorPair::new(WHITE, BLACK),
+            glyph: to_cp437('{'),
+        },
+        Name("Scroll of Magic Mapping".to_string()),
+        ProvidesDungeonMap,
+    ));
+}
+
+pub fn spawn_entity(ecs: &mut World, rng: &mut RandomNumberGenerator, pos: Point) {
+    let roll = rng.roll_dice(1, 6);
+    match roll {
+        1 => spawn_health_potion(ecs, pos),
+        2 => spawn_magic_mapping_scroll(ecs, pos),
+        _ => spawn_monster(ecs, rng, pos),
+    }
+}
