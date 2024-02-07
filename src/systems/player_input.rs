@@ -7,6 +7,7 @@ use crate::prelude::*;
 #[write_component(Health)]
 #[read_component(Item)]
 #[read_component(InBackpack)]
+#[read_component(Weapon)]
 pub fn player_input(
     ecs: &mut SubWorld,
     commands: &mut CommandBuffer,
@@ -49,8 +50,8 @@ pub fn player_input(
         let mut hit_something = false;
         enemies
             .iter(ecs)
-            .filter(|(_, pos)| **pos == destination)
-            .for_each(|(entity, _)| {
+            .filter(|(_entity, pos)| **pos == destination)
+            .for_each(|(entity, _pos)| {
                 hit_something = true;
                 commands.push((
                     (),
@@ -78,10 +79,21 @@ fn collect_item(ecs: &mut SubWorld, commands: &mut CommandBuffer, player: Entity
     let mut items = <(Entity, &Item, &Point)>::query();
     items
         .iter(ecs)
-        .filter(|(_, _, &item_pos)| item_pos == player_pos)
-        .for_each(|(item, _, _)| {
-            commands.remove_component::<Point>(*item);
-            commands.add_component(*item, InBackpack { owner: player });
+        .filter(|(_entity, _item, &item_pos)| item_pos == player_pos)
+        .for_each(|(entity, _item, _item_pos)| {
+            commands.remove_component::<Point>(*entity);
+            commands.add_component(*entity, InBackpack { owner: player });
+
+            if let Ok(e) = ecs.entry_ref(*entity) {
+                if e.get_component::<Weapon>().is_ok() {
+                    <(Entity, &InBackpack, &Weapon)>::query()
+                        .iter(ecs)
+                        .filter(|(_entity, in_backpack, _weapon)| in_backpack.owner == player)
+                        .for_each(|(e, _in_backpack, _weapon)| {
+                            commands.remove(*e);
+                        })
+                }
+            }
         });
     Point::zero()
 }
@@ -94,10 +106,10 @@ fn use_item(n: usize, ecs: &mut SubWorld, commands: &mut CommandBuffer) -> Point
         .unwrap();
     let item_entity = <(Entity, &Item, &InBackpack)>::query()
         .iter(ecs)
-        .filter(|(_, _, carried)| carried.owner == player_entity)
+        .filter(|(_entity, _item, in_backpack)| in_backpack.owner == player_entity)
         .enumerate()
-        .filter(|(item_count, (_, _, _))| *item_count == n)
-        .map(|(_, (item_entity, _, _))| *item_entity)
+        .filter(|(item_count, (_entity, _item, _in_backpack))| *item_count == n)
+        .map(|(_item_count, (item_entity, _item, _in_backpack))| *item_entity)
         .next();
     if let Some(item_entity) = item_entity {
         commands.push((

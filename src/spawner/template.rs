@@ -61,8 +61,6 @@ impl Templates {
     }
 
     pub fn spawn_entity(&self, point: &Point, template: &Template, commands: &mut CommandBuffer) {
-        println!("{:?}", template);
-
         let entity = commands.push((
             *point,
             Render {
@@ -96,6 +94,13 @@ impl Templates {
                     println!("Warning: we don't know how to provide {}", provides);
                 }
             });
+        }
+
+        if let Some(damage) = template.base_damage {
+            commands.add_component(entity, Damage(damage));
+            if template.entity_type == EntityType::Item {
+                commands.add_component(entity, Weapon);
+            }
         }
     }
 }
